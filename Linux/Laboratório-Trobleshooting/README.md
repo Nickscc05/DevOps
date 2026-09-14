@@ -29,3 +29,9 @@ Ao concluir o laboratório:
 | API | Node.js (serviço systemd `training-api`) |
 | Banco de dados | PostgreSQL 16 |
 | Acesso | SSH via chave (`lab.pem`) |
+
+## Arquitetura de fluxo de requisição 
+
+```
+Navegador → Nginx (porta 80) → API Node.js (porta 3000) → PostgreSQL (porta 5432)
+```
