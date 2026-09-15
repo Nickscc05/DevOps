@@ -86,3 +86,17 @@ systemctl status nginx --no-pager
 O seguinte comando foi inserido para termos as seguintes confirmações: Se o Nginx estava **rodando agora** (`active (running)`) e se estava habilitado para subir automaticamente em um reboot (`enabled`). A flag `--no-pager` serve para mostrar apenas o necessário. 
 
 ![alt text](<Captura de tela 2026-09-15 101215.png>)
+
+**4. Detalhe do que estava sendo escutado porém filtrado para TCP**
+ 
+```bash
+sudo ss -lntp
+```
+ 
+Essa versão do `ss`, nos retorna um olhar apenas para sockets TCP em escuta (`-l` listening, `-n` números de porta, `-t` TCP, `-p` processo). Foi aqui que foi possível comparar com a saída do `nginx -T`, e perceber o problema central:
+
+```
+LISTEN  0  511  ***.*.*.*:3000  users:(("node",pid=4157,...))
+```
+ 
+O processo Node (a API) estava escutando na porta **3000**, e **nenhuma linha da saída mostrava algo escutando na porta 3001** — que era exatamente a porta para onde o Nginx estava configurado a repassar as requisições de `/api/`.
