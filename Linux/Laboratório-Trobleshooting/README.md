@@ -85,7 +85,6 @@ systemctl status nginx --no-pager
 
 O seguinte comando foi inserido para termos as seguintes confirmações: Se o Nginx estava **rodando agora** (`active (running)`) e se estava habilitado para subir automaticamente em um reboot (`enabled`). A flag `--no-pager` serve para mostrar apenas o necessário. 
 
-![alt text](<Captura de tela 2026-09-15 101215.png>)
 
 **4. Detalhe do que estava sendo escutado porém filtrado para TCP**
  
@@ -103,7 +102,7 @@ O processo Node (a API) estava escutando na porta **3000**, e **nenhuma linha da
 
 ## Identificação/Solução do erro
 
-Como foi possível ver acima o nosso primeiro problema estava se dando porque o Nginx encaminhava as requisições de '/api/' para '***.*.*.*:3001', mas o processo da API (node) estava sendo escutado na porta '3000'. Como não havia nada sendo escutado na porta 3001 a conexão do proxy falhava o que nos gerava o erro  `Unexpected token '<'` mas é importante lembrar que essa mensagem não tinha uma ligação 100% direta com o nosso problema em si (porta errada). O que acontecia era : 
+Como foi possível ver acima o nosso primeiro problema estava se dando porque o Nginx encaminhava as requisições de '/api/' para ***.*.*.*:3001, mas o processo da API (node) estava sendo escutado na porta '3000'. Como não havia nada sendo escutado na porta 3001 a conexão do proxy falhava o que nos gerava o erro  `Unexpected token '<'` mas é importante lembrar que essa mensagem não tinha uma ligação 100% direta com o nosso problema em si (porta errada). O que acontecia era : 
 
 1. O front-end fazia uma requisição para `/api/...`, esperando uma resposta em **JSON**.
 2. O Nginx tentava repassar essa requisição para ***.*.*.*:3001, mas **não havia ninguém escutando ali** (conexão recusada).
