@@ -35,3 +35,33 @@ Ao concluir o laboratório:
 ```
 Navegador → Nginx (porta 80) → API Node.js (porta 3000) → PostgreSQL (porta 5432)
 ```
+
+Durante o processo foi importante entender como tudo se relaciona, é como se fosse uma corrente está tudo ligado um ao outro. Então, quando um elo quebra tudo que vem depois dele para de funcionar também - nosso papel é investigar a situação e entender em qual camada está nossso problema mas pra isso devemos analisar do inicio ao fim fazendo validações antes de prosseguir para a próxima camada. É importante entender e achar o erro para depois procurar a melhor solução. 
+
+---
+
+## Estado Inicial 
+
+Ao acessar a aplicação pela primeira vez, existia o seguinte erro: 
+
+![alt text](<Captura de tela 2026-09-14 142627.png>)
+
+Esse erro está nos informando um sintoma na verdade, descreve algo que aparece no **front-end**, mas não necessáriamente está relacionado com a origem do problema. É aqui que podemos começar a investigação.
+
+---
+
+## Incidente 1 - Falha ao encaminhar o Nginx para a porta correta
+
+### **1. Levantamento inicial das portas da nossa aplicação**
+
+```bash
+sudo ss -tulpn
+```
+
+Esse comando foi inserido para podermos ter uma visão geral de todos os processos que estavam sendo escutados nas portas do servidor.
+
+- `-t` → mostra sockets TCP
+- `-u` → mostra sockets UDP
+- `-l` → mostra apenas sockets em modo *listening* (escutando), não conexões já estabelecidas
+- `-p` → mostra qual processo (nome e PID) é dono de cada socket
+- `-n` → mostra números de porta em vez de tentar resolver nomes de serviço, o que deixa a leitura mais rápida
