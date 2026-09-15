@@ -100,3 +100,12 @@ LISTEN  0  511  ***.*.*.*:3000  users:(("node",pid=4157,...))
 ```
  
 O processo Node (a API) estava escutando na porta **3000**, e **nenhuma linha da saída mostrava algo escutando na porta 3001** — que era exatamente a porta para onde o Nginx estava configurado a repassar as requisições de `/api/`.
+
+## Identificação/Solução do erro
+
+Como foi possível ver acima o nosso primeiro problema estava se dando porque o Nginx encaminhava as requisições de '/api/' para '***.*.*.*:3001', mas o processo da API (node) estava sendo escutado na porta '3000'. Como não havia nada sendo escutado na porta 3001 a conexão do proxy falhava o que nos gerava o erro  `Unexpected token '<'` mas é importante lembrar que essa mensagem não tinha uma ligação 100% direta com o nosso problema em si (porta errada). O que acontecia era : 
+
+1. O front-end fazia uma requisição para `/api/...`, esperando uma resposta em **JSON**.
+2. O Nginx tentava repassar essa requisição para `***.*.*.*:3001`, mas **não havia ninguém escutando ali** (conexão recusada).
+3. Quando esse repasse falha, o **próprio Nginx** gera uma página de erro — e páginas de erro do Nginx são, por padrão, em **HTML** (começam com `<html>` ou similar).
+4. O front-end recebia essa resposta e tentava interpretá-la como JSON. Como o primeiro caractere encontrado era `<` (início de uma tag HTML), o parser de JSON falhava com exatamente esse erro: `Unexpected token '<'`.
