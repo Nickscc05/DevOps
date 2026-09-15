@@ -52,7 +52,9 @@ Esse erro está nos informando um sintoma na verdade, descreve algo que aparece 
 
 ## Incidente 1 - Falha ao encaminhar o Nginx para a porta correta
 
-### **1. Levantamento inicial das portas da nossa aplicação**
+### Passo a passo 
+
+**1. Levantamento inicial das portas da nossa aplicação**
 
 ```bash
 sudo ss -tulpn
@@ -65,3 +67,29 @@ Esse comando foi inserido para podermos ter uma visão geral de todos os process
 - `-l` → mostra apenas sockets em modo *listening* (escutando), não conexões já estabelecidas
 - `-p` → mostra qual processo (nome e PID) é dono de cada socket
 - `-n` → mostra números de porta em vez de tentar resolver nomes de serviço, o que deixa a leitura mais rápida
+
+**2. Verificação do Nginx**
+
+```bash
+sudo nginx -T
+```
+
+Ao inserirmos é solicitado ao nginx a sintaxe da sua própria configuração e imprimir no nosso terminal o conteúdo completo dos arquivos de configuração carregados. É um comando bastante útil pois nos retorna exatamente a configurações e principalmente as ativas, ao analisar chegamos a primeira questão foi nos retornado um output que mostrava o proxy_pass que finalizava com a porta 3001.
+
+Foi nos entregue esse output: 
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:3001;
+}
+```
+
+**3. Confirmação de que o Nginx estava funcionando corretamente** 
+
+```bash
+systemctl status nginx --no-pager
+```
+
+O seguinte comando foi inserido para termos as seguintes confirmações: Se o Nginx estava **rodando agora** (`active (running)`) e se estava habilitado para subir automaticamente em um reboot (`enabled`). A flag `--no-pager` serve para mostrar apenas o necessário. 
+
+![alt text](<Captura de tela 2026-09-15 101215.png>)
