@@ -76,13 +76,6 @@ sudo nginx -T
 
 Ao inserirmos é solicitado ao nginx a sintaxe da sua própria configuração e imprimir no nosso terminal o conteúdo completo dos arquivos de configuração carregados. É um comando bastante útil pois nos retorna exatamente a configurações e principalmente as ativas, ao analisar chegamos a primeira questão foi nos retornado um output que mostrava o proxy_pass que finalizava com a porta 3001.
 
-Foi nos entregue esse output: 
-
-```nginx
-location /api/ {
-    proxy_pass http://127.0.0.1:3001;
-}
-```
 
 **3. Confirmação de que o Nginx estava funcionando corretamente** 
 
