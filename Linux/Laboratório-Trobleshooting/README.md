@@ -108,3 +108,26 @@ Como foi possível ver acima o nosso primeiro problema estava se dando porque o 
 2. O Nginx tentava repassar essa requisição para ***.*.*.*:3001 , mas **não havia ninguém escutando ali** (conexão recusada).
 3. Quando esse repasse falha, o **próprio Nginx** gera uma página de erro — e páginas de erro do Nginx são, por padrão, em **HTML** (começam com `<html>` ou similar).
 4. O front-end recebia essa resposta e tentava interpretá-la como JSON. Como o primeiro caractere encontrado era `<` (início de uma tag HTML), o parser de JSON falhava com exatamente esse erro: `Unexpected token '<'`.
+
+### Correção do erro
+
+Para a questão ser resolvida foi necessário acessar o arquivo de configuração do site e edita-lo 
+
+```bash
+sudo nano /etc/nginx/sites-enabled/training
+```
+
+Como foi citado a porta de distino foi alterada de 3001 para 3000 alinhando com a porta que a API Node estava rodando 
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+ 
+location = /health {
+    proxy_pass http://127.0.0.1:3000/health;
+}
+```
+ 
