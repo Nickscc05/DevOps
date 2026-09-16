@@ -2,13 +2,13 @@
  
 ## Objetivo
 
-Foi apresentado um ambiente Linus que executa uma aplicação web simples. A aplicação possui três camadas: 
+Foi apresentado um ambiente Linux que executa uma aplicação web simples. A aplicação possui três camadas:
 
 - Uma interface Web;
 - Uma API responsável pela lógica de aplicação;
 - Um banco de dados que armazena os dados exibidos.
 
-O ambiente foi preparado com uma falha controlada. A missão era investigar o estado da aplicação, identificar a causa raiz e reativar o fluxo completo para que a págin volte a funcionar. 
+O ambiente foi preparado com uma falha controlada. A missão era investigar o estado da aplicação, identificar a causa raiz e reativar o fluxo completo para que a página volte a funcionar.
 
 ## Resultado esperado
 
@@ -36,7 +36,7 @@ Ao concluir o laboratório:
 Navegador → Nginx (porta 80) → API Node.js (porta 3000) → PostgreSQL (porta 5432)
 ```
 
-Durante o processo foi importante entender como tudo se relaciona, é como se fosse uma corrente está tudo ligado um ao outro. Então, quando um elo quebra tudo que vem depois dele para de funcionar também - nosso papel é investigar a situação e entender em qual camada está nossso problema mas pra isso devemos analisar do inicio ao fim fazendo validações antes de prosseguir para a próxima camada. É importante entender e achar o erro para depois procurar a melhor solução. 
+Durante o processo foi importante entender como tudo se relaciona, é como se fosse uma corrente está tudo ligado um ao outro. Então, quando um elo quebra tudo que vem depois dele para de funcionar também - nosso papel é investigar a situação e entender em qual camada está nosso problema mas pra isso devemos analisar do início ao fim fazendo validações antes de prosseguir para a próxima camada. É importante entender e achar o erro para depois procurar a melhor solução.
 
 ---
 
@@ -46,7 +46,7 @@ Ao acessar a aplicação pela primeira vez, existia o seguinte erro:
 
 ![alt text](<Captura de tela 2026-09-14 142627.png>)
 
-Esse erro está nos informando um sintoma na verdade, descreve algo que aparece no **front-end**, mas não necessáriamente está relacionado com a origem do problema. É aqui que podemos começar a investigação.
+Esse erro está nos informando um sintoma na verdade, descreve algo que aparece no **front-end**, mas não necessariamente está relacionado com a origem do problema. É aqui que podemos começar a investigação.
 
 ---
 
@@ -100,7 +100,7 @@ LISTEN  0  511  ***.*.*.*:3000  users:(("node",pid=4157,...))
  
 O processo Node (a API) estava escutando na porta **3000**, e **nenhuma linha da saída mostrava algo escutando na porta 3001** — que era exatamente a porta para onde o Nginx estava configurado a repassar as requisições de `/api/`.
 
-## Identificação/Solução do erro
+### Identificação/Solução do erro
 
 Como foi possível ver acima o nosso primeiro problema estava se dando porque o Nginx encaminhava as requisições de '/api/' para ***.*.*.*:3001 , mas o processo da API (node) estava sendo escutado na porta '3000'. Como não havia nada sendo escutado na porta 3001 a conexão do proxy falhava o que nos gerava o erro  `Unexpected token '<'` mas é importante lembrar que essa mensagem não tinha uma ligação 100% direta com o nosso problema em si (porta errada). O que acontecia era : 
 
@@ -117,7 +117,7 @@ Para a questão ser resolvida foi necessário acessar o arquivo de configuraçã
 sudo nano /etc/nginx/sites-enabled/training
 ```
 
-Como foi citado a porta de distino foi alterada de 3001 para 3000 alinhando com a porta que a API Node estava rodando 
+Como foi citado a porta de destino foi  alterada de 3001 para 3000 alinhando com a porta que a API Node estava rodando 
 
 ```nginx
 location /api/ {
@@ -139,7 +139,7 @@ O `reload` (diferente de `restart`) aplica a nova configuração sem derrubar co
 
 ## Incidente 2 - Permissão negada no banco de dados
 
-Ao solucionar o primeiro incidente, foi nos relevado um segundo incidente com a comunicação entre a API e o banco de dados, então se deu início a uma nova investigação para podermos solucionar essa nova questão.
+Ao solucionar o primeiro incidente, foi nos revelado um segundo incidente com a comunicação entre a API e o banco de dados, então se deu início a uma nova investigação para podermos solucionar essa nova questão.
 
 ### Passo a passo 
 
@@ -195,7 +195,7 @@ Essa mensagem específica (`permission denied for table items`) foi decisiva par
  
 Ou seja: a API conseguia **conectar e autenticar** normalmente no PostgreSQL (usuário e senha corretos). O problema estava em um nível mais específico: o usuário usado pela API não tinha **permissão de leitura (`SELECT`)** concedida sobre a tabela `items`.
  
-**4. No quarto passo deveriamos localizar as credenciais da API:**
+**4. No quarto passo deveríamos localizar as credenciais da API:**
  
 Para confirmar qual usuário a API usava para se conectar ao banco, foi consultada a definição do serviço systemd:
  
