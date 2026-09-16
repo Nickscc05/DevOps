@@ -137,3 +137,135 @@ sudo systemctl reload nginx
 ```
 O `reload` (diferente de `restart`) aplica a nova configuração sem derrubar completamente o processo do Nginx nem interromper conexões já em andamento — ele recarrega a configuração.
 
+## Incidente 2 - Permissão negada no banco de dados
+
+Ao solucionar o primeiro incidente, foi nos relevado um segundo incidente com a comunicação entre a API e o banco de dados, então se deu início a uma nova investigação para podermos solucionar essa nova questão.
+
+### Passo a passo 
+
+
+**1. O primeiro passo foi confirmar se o PostgreSQL estava, de fato, rodando:**
+ 
+```bash
+systemctl list-units --type=service --all | grep -Ei 'postgres'
+sudo ss -lntp
+```
+ 
+O resultado nos mostrou que o PostgreSQL estava ativo e escutando na porta padrão:
+ 
+```
+postgresql@16-main.service   active  running   PostgreSQL Cluster 16-main
+LISTEN  0  200  127.0.0.1:5432  users:(("postgres",pid=3781,...))
+```
+ 
+**2. O segundo passo foi buscar a causa **exata** do erro, direto na fonte:** 
+
+Acessando log do próprio serviço da API. Como o serviço é gerenciado pelo systemd, foi usado o `journalctl`:
+ 
+```bash
+sudo journalctl -u training-api -f
+```
+ 
+Para descobrir qual endpoint exato o front-end estava chamando, foram usadas as **Ferramentas do Desenvolvedor** do navegador (aba *Network*), o que revelou uma requisição para `items` retornando status **500 (Internal Server Error)**.
+ 
+Com o endpoint correto em mãos, a requisição foi reproduzida manualmente, em paralelo com a observação do log:
+ 
+```bash
+curl -v http://localhost/api/items
+```
+ 
+A resposta trouxe o detalhe exato da falha:
+ 
+```json
+{"error":"Não foi possível consultar o banco","detail":"ERROR:  permission denied for table items"}
+```
+
+![alt text](<Captura de tela 2026-09-14 151331.png>)
+ 
+**3. O terceiro passo seria interpretar a mensagem de erro:**
+ 
+Essa mensagem específica (`permission denied for table items`) foi decisiva para direcionar a investigação, porque ela **descarta** algumas causas e **aponta** para uma bem específica:
+ 
+| Se o erro fosse... | Indicaria... |
+|---|---|
+| `ECONNREFUSED` | Banco não aceitando conexões (porta/host errados) |
+| `password authentication failed` | Credencial de acesso incorreta |
+| `relation "items" does not exist` | Tabela inexistente |
+| **`permission denied for table items`** (o que ocorreu) | **Conexão e autenticação OK — o problema é de autorização em uma tabela específica** |
+ 
+Ou seja: a API conseguia **conectar e autenticar** normalmente no PostgreSQL (usuário e senha corretos). O problema estava em um nível mais específico: o usuário usado pela API não tinha **permissão de leitura (`SELECT`)** concedida sobre a tabela `items`.
+ 
+**4. No quarto passo deveriamos localizar as credenciais da API:**
+ 
+Para confirmar qual usuário a API usava para se conectar ao banco, foi consultada a definição do serviço systemd:
+ 
+```bash
+sudo systemctl cat training-api
+```
+![alt text](image.png)
+ 
+O arquivo revelou as variáveis de ambiente da aplicação:
+ 
+```
+Environment=DB_HOST=127.0.0.1
+Environment=DB_NAME=training
+Environment=DB_USER=training_app
+Environment=DB_PASSWORD=training_password
+```
+ 
+O usuário de banco usado pela API era, portanto, **`training_app`**.
+ 
+**5.O quinto passo é a confirmação da causa dentro do PostgreSQL:**
+ 
+Com o nome do usuário em mãos, o banco foi acessado diretamente, como superusuário, para inspecionar as permissões da tabela:
+ 
+```bash
+sudo -u postgres psql -d training
+```
+ 
+Dentro do console interativo do PostgreSQL (`psql`), dois comandos confirmaram a causa raiz:
+ 
+```sql
+\dt items    -- mostra o dono da tabela
+\dp items    -- mostra os privilégios de acesso concedidos
+```
+ 
+O `\dt items` mostrou que a tabela pertencia ao usuário `postgres` (o superusuário/administrador), não ao `training_app`. E o `\dp items` mostrou a coluna **"Access privileges" completamente vazia** — o que, no PostgreSQL, significa que nenhuma permissão explícita havia sido concedida a nenhum usuário além do dono. Por padrão, apenas o dono de uma tabela tem acesso automático a ela; qualquer outro usuário precisa receber permissão explícita via `GRANT`.
+ 
+Isso confirmou a causa raiz: a tabela `items` existia e tinha dados corretos, mas o usuário `training_app` nunca havia recebido permissão para lê-la.
+ 
+### Correção
+ 
+A permissão de leitura foi concedida explicitamente ao usuário da aplicação:
+ 
+```sql
+GRANT SELECT ON items TO training_app;
+```
+ 
+Foi concedido especificamente `SELECT` (leitura), e não outras permissões como `INSERT` ou `UPDATE`, porque o objetivo do laboratório era apenas que a interface conseguisse **consultar e exibir** os dados — não alterá-los.
+ 
+### Validação
+ 
+A permissão foi confirmada dentro do próprio banco, repetindo o `\dp items`:
+ 
+```
+public | items | table | postgres=arwdDxt/postgres+
+                        | training_app=r/postgres
+```
+ 
+A letra `r` (read/SELECT) ao lado de `training_app` confirmou que a permissão havia sido aplicada corretamente.
+ 
+Em seguida, a aplicação foi testada de ponta a ponta:
+ 
+```bash
+curl -v http://localhost/api/items
+```
+ 
+A resposta passou a retornar `HTTP/1.1 200 OK` com os dados em JSON, e a página no navegador voltou a carregar normalmente, exibindo:
+ 
+```
+Front, back e banco OK
+Itens cadastrados: Linux, Redes, DevOps
+```
+ 
+---
