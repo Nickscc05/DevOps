@@ -268,4 +268,21 @@ Front, back e banco OK
 Itens cadastrados: Linux, Redes, DevOps
 ```
  
----
+## Resumo dos dois incidentes
+ 
+| | Incidente 1 | Incidente 2 |
+|---|---|---|
+| **Sintoma visível** | `Unexpected token '<'` | `Não foi possível consultar o banco` (HTTP 500) |
+| **Camada afetada** | Nginx → API (proxy) | API → Banco (autorização) |
+| **Causa raiz** | `proxy_pass` apontando para porta 3001, sem processo escutando ali | Usuário `training_app` sem permissão `SELECT` na tabela `items` |
+| **Comando-chave de diagnóstico** | `nginx -T` + `ss -tulpn`/`ss -lntp` (comparando config vs. realidade) | `journalctl` + `curl -v` + `\dp` no `psql` |
+| **Correção** | Ajuste do `proxy_pass` para porta 3000 + `systemctl reload nginx` | `GRANT SELECT ON items TO training_app;` |
+| **Validação** | Página carregando sem erro de parsing | `curl` retornando 200 + itens exibidos na tela |
+ 
+## Principais aprendizados
+ 
+- **Sintoma não é causa.** Os dois erros exibidos na tela (`Unexpected token '<'` e "não foi possível consultar o banco") eram sintomas visíveis no front-end, mas as causas reais estavam em camadas anteriores da aplicação — respectivamente, na configuração do proxy e nas permissões do banco.
+- **Um problema pode mascarar outro.** Resolver o primeiro incidente (Nginx) não finalizou o laboratório — apenas revelou o segundo incidente (permissões), que estava "escondido" atrás do primeiro.
+- **Investigar em camadas, na ordem, evita perder tempo.** Em vez de tentar mexer direto no banco, a investigação seguiu a corrente (Nginx → API → Banco), confirmando cada elo antes de avançar, o que levou direto à causa real sem desperdiçar esforço em lugares que já estavam funcionando.
+- **Erros de permissão no PostgreSQL são de autorização, não de autenticação.** O erro `permission denied` é bem diferente de um erro de senha ou de conexão — ele só aparece depois que o usuário já conseguiu se autenticar, indicando que o problema está em um nível mais específico (o quê aquele usuário pode fazer, não se ele pode entrar).
+- **`journalctl -u <serviço> -f`** é uma ferramenta valiosa para acompanhar logs de serviços gerenciados pelo systemd em tempo real, sem precisar saber o caminho exato de um arquivo de log.
