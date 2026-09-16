@@ -130,4 +130,10 @@ location = /health {
     proxy_pass http://127.0.0.1:3000/health;
 }
 ```
- 
+Após a alteração é necessário inserir o comando abaixo para recarregar e aplicar a nova configuração. 
+
+ ```bash
+sudo systemctl reload nginx
+```
+O `reload` (diferente de `restart`) aplica a nova configuração sem derrubar completamente o processo do Nginx nem interromper conexões já em andamento — ele recarrega a configuração.
+
