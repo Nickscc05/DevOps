@@ -141,6 +141,8 @@ O `reload` (diferente de `restart`) aplica a nova configuração sem derrubar co
 
 Ao solucionar o primeiro incidente, foi nos revelado um segundo incidente com a comunicação entre a API e o banco de dados, então se deu início a uma nova investigação para podermos solucionar essa nova questão.
 
+![alt text](<Captura de tela 2026-09-14 135854.png>)
+
 ### Passo a passo 
 
 
@@ -267,6 +269,8 @@ A resposta passou a retornar `HTTP/1.1 200 OK` com os dados em JSON, e a página
 Front, back e banco OK
 Itens cadastrados: Linux, Redes, DevOps
 ```
+
+![alt text](<Captura de tela 2026-09-14 153927.png>)
  
 ## Resumo dos dois incidentes
  
