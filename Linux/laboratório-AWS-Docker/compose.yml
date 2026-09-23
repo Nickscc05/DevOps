@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: training
+      POSTGRES_USER: training_app
+      POSTGRES_PASSWORD: training_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U training_app -d training"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+        - app-network
+  backend: 
+    build: ./backend
+    container_name: backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: training
+      DB_USER: training_app
+      DB_PASSWORD: training_password
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+  frontend: 
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network   
+
+volumes:
+  postgres_data:
+networks:
+  app-network: 

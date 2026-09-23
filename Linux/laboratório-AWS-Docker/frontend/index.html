@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AWS Docker Lab</title>
+  <style>
+    :root { color-scheme: dark; font-family: Arial, sans-serif; }
+    body { background: #0f172a; color: #e2e8f0; margin: 0; min-height: 100vh; }
+    main { margin: 0 auto; max-width: 820px; padding: 48px 24px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 28px; }
+    h1 { color: #93c5fd; margin-top: 0; }
+    .badge { background: #14532d; border-radius: 999px; color: #bbf7d0; display: inline-block; font-size: .85rem; padding: 6px 12px; }
+    .error { background: #450a0a; color: #fecaca; }
+    li { margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <span class="badge" id="status">Verificando serviços...</span>
+      <h1>Laboratório AWS Docker</h1>
+      <p>Frontend Nginx, API Node.js e banco PostgreSQL.</p>
+      <p>Instância atendida: <strong id="instance">carregando...</strong></p>
+      <h2>Itens cadastrados</h2>
+      <ul id="items"><li>Consultando a API...</li></ul>
+    </section>
+  </main>
+  <script>
+    async function carregar() {
+      const status = document.querySelector('#status');
+      const items = document.querySelector('#items');
+      try {
+        const response = await fetch('/api/items');
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'A API retornou erro');
+        document.querySelector('#instance').textContent = data.instance;
+        items.innerHTML = data.items.map(item => `<li>${item.name}</li>`).join('');
+        status.textContent = 'Frontend, backend e banco OK';
+      } catch (error) {
+        status.className = 'badge error';
+        status.textContent = 'Falha ao consultar a aplicação';
+        items.innerHTML = `<li>${error.message}</li><li>Verifique o Nginx, a API e o PostgreSQL.</li>`;
+      }
+    }
+    carregar();
+  </script>
+</body>
+</html>

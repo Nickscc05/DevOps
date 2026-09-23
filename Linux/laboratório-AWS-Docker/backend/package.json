@@ -1,0 +1,13 @@
+{
+  "name": "aws-docker-training-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API do laboratório AWS Docker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}
