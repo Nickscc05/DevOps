@@ -14,7 +14,7 @@ navegador -> frontend Nginx -> backend Node.js -> PostgreSQL
 lsb_release -a
 ```
 
-Nos mostra as informações padronizadas da distribuição Linux, foi utilizada para sabermos a versão do ubunto da VM. Que neste caso era: **Ubuntu 24.04 LTS (noble)**.
+Nos mostra as informações padronizadas da distribuição Linux, foi utilizada para sabermos a versão do ubuntu da VM. Que neste caso era: **Ubuntu 24.04 LTS (noble)**.
 
 ### Passo 1: atualizar a lista de pacotes e instalar dependências
 
