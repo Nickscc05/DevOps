@@ -19,5 +19,29 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] Containers reiniciados." >> "$LOG_FILE"`
 - `chmod +x`: concede permissão de execução ao script.
 
 
+Posteriormente devemos fazer o agendamento com utilizando o comando abaixo, inicialmente testei o agendamento de 2 em 2 minutos e depois alteirei para 3 em 3 horas.
 
+```bash
+crontab -e
+```
 
+### Como Funciona o Agendamento (Crontab)
+
+O agendamento do Linux utiliza 5 campos de tempo seguidos pelo comando. A estrutura funciona da seguinte forma:
+
+```text
+ .---------------- Minuto (0 - 59)
+ |  .------------- Hora (0 - 23)
+
+ |  |  .---------- Dia do Mês (1 - 31)
+ |  |  |  .------- Mês (1 - 12)
+ |  |  |  |  .---- Dia da Semana (0 - 6) (Domingo é 0)
+ |  |  |  |  |
+ *  *  *  *  *  [COMANDO]
+```
+
+#### Símbolos Especiais:
+* `*` : Executa em **todos** os valores daquele campo.
+* `*/n` : Executa em intervalos de **X em X** tempos (Ex: `*/15` no minuto = a cada 15 minutos).
+* `-` : Define um **intervalo** de valores (Ex: `1-5` no dia da semana = de Segunda a Sexta).
+* `,` : Define uma **lista** de valores específicos (Ex: `0,30` no minuto = apenas no minuto 0 e no minuto 30).
