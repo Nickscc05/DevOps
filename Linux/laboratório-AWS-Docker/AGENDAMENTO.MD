@@ -30,14 +30,13 @@ crontab -e
 O agendamento do Linux utiliza 5 campos de tempo seguidos pelo comando. A estrutura funciona da seguinte forma:
 
 ```text
- .---------------- Minuto (0 - 59)
- |  .------------- Hora (0 - 23)
-
- |  |  .---------- Dia do Mês (1 - 31)
- |  |  |  .------- Mês (1 - 12)
- |  |  |  |  .---- Dia da Semana (0 - 6) (Domingo é 0)
- |  |  |  |  |
- *  *  *  *  *  [COMANDO]
+ * * * * * comando-a-executar
+│ │ │ │ │
+│ │ │ │ └── dia da semana (0-6, domingo=0)
+│ │ │ └──── mês (1-12)
+│ │ └────── dia do mês (1-31)
+│ └──────── hora (0-23)
+└────────── minuto (0-59)
 ```
 
 #### Símbolos Especiais:
@@ -45,3 +44,5 @@ O agendamento do Linux utiliza 5 campos de tempo seguidos pelo comando. A estrut
 * `*/n` : Executa em intervalos de **X em X** tempos (Ex: `*/15` no minuto = a cada 15 minutos).
 * `-` : Define um **intervalo** de valores (Ex: `1-5` no dia da semana = de Segunda a Sexta).
 * `,` : Define uma **lista** de valores específicos (Ex: `0,30` no minuto = apenas no minuto 0 e no minuto 30).
+
+Então para ficar
