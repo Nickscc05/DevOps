@@ -57,7 +57,7 @@ Dessa primeira forma definimos para ele para realilzar o restart de 2 em dois mi
 
 ![alt text](image-9.png)
 
-Após isso foi realizado a alteração para que ele fosse reiniciado de 1 em uma hora. E para termos os controles e sabermos do log podemos utilizar o comando abaixo:
+Após isso foi realizado a alteração para que ele fosse reiniciado de 1 em 1 hora. E para termos os controles e sabermos do log podemos utilizar o comando abaixo:
 
 ![alt text](image-10.png)
 
