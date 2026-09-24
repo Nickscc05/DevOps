@@ -19,7 +19,7 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] Containers reiniciados." >> "$LOG_FILE"`
 - `chmod +x`: concede permissão de execução ao script.
 
 
-Posteriormente devemos fazer o agendamento com utilizando o comando abaixo, inicialmente testei o agendamento de 2 em 2 minutos e depois alteirei para 3 em 3 horas.
+Posteriormente devemos fazer o agendamento com utilizando o comando abaixo, inicialmente testei o agendamento de 2 em 2 minutos e depois alteirei para o restart ser feito de 1 em 1 hora.
 
 ```bash
 crontab -e
@@ -45,4 +45,22 @@ O agendamento do Linux utiliza 5 campos de tempo seguidos pelo comando. A estrut
 * `-` : Define um **intervalo** de valores (Ex: `1-5` no dia da semana = de Segunda a Sexta).
 * `,` : Define uma **lista** de valores específicos (Ex: `0,30` no minuto = apenas no minuto 0 e no minuto 30).
 
-Então para ficar
+Então para editar o tempo desejado devemos entrar no editor do crontab
+
+```bash
+   sudo crontab -e
+```
+
+![alt text](image-8.png)
+
+Dessa primeira forma definimos para ele para realilzar o restart de 2 em dois minutos o que nos deu esse retorno 
+
+![alt text](image-9.png)
+
+Após isso foi realizado a alteração para que ele fosse reiniciado de 1 em uma hora. E para termos os controles e sabermos do log podemos utilizar o comando abaixo:
+
+![alt text](image-10.png)
+
+```bash
+cat restart.log
+```
