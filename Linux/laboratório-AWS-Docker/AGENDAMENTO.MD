@@ -11,11 +11,3 @@ docker compose restart >> "$LOG_FILE" 2>&1
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Containers reiniciados." >> "$LOG_FILE"
 
 
- .---------------- minuto (0 - 59)
- |  .------------- hora (0 - 23)
-
- |  |  .---------- dia do mês (1 - 31)
- |  |  |  .------- mês (1 - 12)
- |  |  |  |  .---- dia da semana (0 - 6) (Domingo é 0 ou 7)
- |  |  |  |  |
- *  *  *  *  *  comando_para_executar
