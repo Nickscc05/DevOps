@@ -53,7 +53,7 @@ Então para editar o tempo desejado devemos entrar no editor do crontab
 
 ![alt text](image-8.png)
 
-Dessa primeira forma definimos para ele para realilzar o restart de 2 em dois minutos o que nos deu esse retorno 
+Dessa primeira forma definimos para ele para realilzar o restart de 2 em 2 minutos o que nos deu esse retorno 
 
 ![alt text](image-9.png)
 
